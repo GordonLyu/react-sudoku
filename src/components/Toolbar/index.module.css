@@ -8,7 +8,6 @@
     height: 100%;
     padding: 20px 10px;
     box-sizing: border-box;
-    background-color: #f5f5f5;
 }
 
 .toolbar .num {
@@ -17,9 +16,29 @@
     height: 100%;
     justify-content: center;
     align-items: center;
-    background-color: #fff;
     border-radius: 5px;
     box-shadow: 0 0 6px 0 #aaa;
     user-select: none;
     cursor: pointer;
+    transition: .3s;
+    /* 手机端点击背景颜色 */
+    -webkit-tap-highlight-color: transparent;
+    ;
+
+    &:hover {
+        box-shadow: 0 0 8px 0 #aaa;
+    }
+
+    &:active {
+        box-shadow: 0 0 10px 1px #aaa;
+        background-color: #b0bfff;
+    }
+}
+
+.toolbar .audio {
+    background-color: #eee;
+
+    &.open {
+        background-color: #b0bfff;
+    }
 }

@@ -3,11 +3,12 @@ import './index.css'
 import topic from '@/utils/topic'
 import Toolbar from '@/components/Toolbar'
 
+
+const insertNumberAudio = new Audio('/audio/plop.wav');// 填入数字音效
+const clearNumberAudio = new Audio('/audio/clear.mp3');// 擦除数字音效
+insertNumberAudio.volume = clearNumberAudio.volume = 0.5;
+
 topic.build()
-
-
-
-
 
 
 const sudoku: React.FC = () => {
@@ -18,11 +19,11 @@ const sudoku: React.FC = () => {
     fixed: boolean,
   }>>>(() => {
     let tt = []
-    for (let i = 0, l = 0; i < 9; i++) {
+    for (let i = 0, l = 1; i < 9; i++) {
       const t = [];
       for (let j = 0; j < 9; j++, l++) {
         t.push({
-          value: null,
+          value: l,
           fixed: false
         });
       }
@@ -78,34 +79,53 @@ const sudoku: React.FC = () => {
     setSelected([-1, -1]);
   }
 
-  // 获取选择输入的数字
-  const selectNumber = (num: number) => {
+
+  // 开关音频
+  const audioSwitch = (isOpen?: boolean) => {
+    if (isOpen) {
+      insertNumberAudio.volume = clearNumberAudio.volume = 1;
+    } else {
+      insertNumberAudio.volume = clearNumberAudio.volume = 0;
+    }
+  }
+
+
+  // 填入数字
+  const insertNumber = (r: number, c: number, n: number | null) => {
     if (selected[0] == -1) {
       return;
     }
-    numbers[selected[0]][selected[1]].value = num;
+    numbers[r][c].value = n;
     setNumbers([...numbers]);
     cancelSelectNumber();
+
+    // 播放音效
+    if (n) {
+      insertNumberAudio.currentTime = 0.6;
+      insertNumberAudio.play();
+    } else {
+      clearNumberAudio.currentTime = 4.5;
+      clearNumberAudio.play();
+    }
+  }
+
+  // 获取选择输入的数字
+  const selectNumber = (num: number) => {
+    insertNumber(selected[0], selected[1], num);
   }
 
   // 清除数字
   const clearNumber = () => {
-    numbers[selected[0]][selected[1]].value = null;
-    setNumbers([...numbers])
+    insertNumber(selected[0], selected[1], null);
   }
 
   // 键盘输入数字
   window.onkeydown = (e: KeyboardEvent) => {
-    if (selected[0] == -1) {
-      return;
-    }
     if (e.key.match('[1-9]')) {
-      numbers[selected[0]][selected[1]].value = Number(e.key);
-      setNumbers([...numbers])
+      insertNumber(selected[0], selected[1], Number(e.key));
     } else if (e.key == 'Backspace' || e.key == ' ') {
       clearNumber();
     }
-    cancelSelectNumber();
   }
 
   return (
@@ -126,7 +146,7 @@ const sudoku: React.FC = () => {
         })}
       </div>
       <div className="toolbar-main" ref={toolbarRef}>
-        <Toolbar getNumber={selectNumber} clearNumber={clearNumber}></Toolbar>
+        <Toolbar getNumber={selectNumber} clearNumber={clearNumber} audioSwitch={audioSwitch}></Toolbar>
       </div>
     </>
   )

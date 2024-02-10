@@ -13,33 +13,44 @@ topic.build()
 const sudoku: React.FC = () => {
   const [toolbarHight, setToolbarHight] = useState<number>();
   const [selected, setSelected] = useState<number[]>([-1, -1]);
-  const [numbers, setNumbers] = useState<Array<Array<number | null>>>(() => {
+  const [numbers, setNumbers] = useState<Array<Array<{
+    value: number | null,
+    fixed: boolean,
+  }>>>(() => {
     let tt = []
     for (let i = 0, l = 0; i < 9; i++) {
-      const t: number[] = [];
+      const t = [];
       for (let j = 0; j < 9; j++, l++) {
-        t.push(l);
+        t.push({
+          value: null,
+          fixed: false
+        });
       }
       tt.push(t);
     }
     return tt;
   });
 
+
   const toolbarRef = createRef<HTMLDivElement>()
 
-  // 选择数字
+
+
+  setTimeout(() => {
+    numbers[1][1] = {
+      value: 3,
+      fixed: true
+    };
+    setNumbers([...numbers])
+
+  }, 0)
+
+
+
+  // 工具栏高度自适应
   const ChangeToolbarHight = () => {
     if (toolbarRef.current?.clientHeight) {
       setToolbarHight(toolbarRef.current?.clientHeight);
-    }
-  }
-
-  // 选择元素
-  const selectItem = (ij: number[]) => {
-    if (selected[0] == ij[0] && selected[1] == ij[1]) {
-      setSelected([-1, -1]);
-    } else {
-      setSelected(ij);
     }
   }
   setTimeout(() => {
@@ -49,29 +60,52 @@ const sudoku: React.FC = () => {
     ChangeToolbarHight();
   }
 
+  // 选择格子
+  const selectItem = (r: number, c: number) => {
+    if (numbers[r][c].fixed) {
+      return;
+    }
+    // 再次点击已选择的格子取消选择
+    if (selected[0] == r && selected[1] == c) {
+      cancelSelectNumber();
+    } else {
+      setSelected([r, c]);
+    }
+  }
 
-  // 获取选择的数字
+  // 取消选取格子
+  const cancelSelectNumber = () => {
+    setSelected([-1, -1]);
+  }
+
+  // 获取选择输入的数字
   const selectNumber = (num: number) => {
-    numbers[selected[0]][selected[1]] = num;
-    setNumbers([...numbers])
-    console.log(numbers);
+    if (selected[0] == -1) {
+      return;
+    }
+    numbers[selected[0]][selected[1]].value = num;
+    setNumbers([...numbers]);
+    cancelSelectNumber();
   }
 
   // 清除数字
   const clearNumber = () => {
-    numbers[selected[0]][selected[1]] = null;
+    numbers[selected[0]][selected[1]].value = null;
     setNumbers([...numbers])
   }
 
   // 键盘输入数字
   window.onkeydown = (e: KeyboardEvent) => {
+    if (selected[0] == -1) {
+      return;
+    }
     if (e.key.match('[1-9]')) {
-      numbers[selected[0]][selected[1]] = Number(e.key);
+      numbers[selected[0]][selected[1]].value = Number(e.key);
       setNumbers([...numbers])
-    } else if (e.key == 'Backspace') {
+    } else if (e.key == 'Backspace' || e.key == ' ') {
       clearNumber();
     }
-
+    cancelSelectNumber();
   }
 
   return (
@@ -84,7 +118,7 @@ const sudoku: React.FC = () => {
             <div className='grid' key={i}>
               {row.map((_item, j) => {
                 return (
-                  <div className={selected![0] == i && selected![1] == j ? 'selected' : ''} onClick={() => { selectItem([i, j]) }} key={i * (j + 1) + j}>{_item}</div>
+                  <div className={`${_item.value ? 'inserted' : ''} ${selected![0] == i && selected![1] == j ? 'selected' : ''} ${_item.fixed ? 'fixed' : ''} `} onClick={() => { selectItem(i, j) }} key={i * (j + 1) + j}>{_item.value}</div>
                 )
               })}
             </div>

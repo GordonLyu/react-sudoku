@@ -19,6 +19,22 @@
     text-shadow: 0 0 0 5px #000;
 }
 
+.mask .btn {
+    display: inline-block;
+    margin-top: 40px;
+    padding: 10px;
+    color: #000;
+    background-color: #e7f1ff;
+    box-shadow: 0 0 10px 0 #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: .3s;
+
+    &:hover {
+        background-color: #a9cbfc;
+    }
+}
+
 .main {
     position: relative;
     top: 40px;

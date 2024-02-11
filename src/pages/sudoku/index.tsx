@@ -19,7 +19,7 @@ const sudoku: React.FC = () => {
   const [toolbarHight, setToolbarHight] = useState<number>();
   const [selected, setSelected] = useState<number[]>([-1, -1]);
   const [building, setBuilding] = useState<boolean>(false);
-  const [isComplete, setIsComplete] = useState<boolean>(false)
+  const [isComplete, setIsComplete] = useState<boolean>(true)
   const [ans, setAns] = useState<number[][]>([]);
   const [numbers, setNumbers] = useState<TopicInterface[][]>(() => {
     let tt = []
@@ -164,8 +164,9 @@ const sudoku: React.FC = () => {
     <>
       {isComplete ?
         (<div className='mask'>
-          <div>恭喜！已完成数独</div>
-          <div onClick={() => { setIsComplete(false) }}>确定</div>
+          <div>恭喜！已完成数独！</div>
+          <div>点击底部“生成题目”，再次生成新游戏</div>
+          <div onClick={() => { setIsComplete(false) }} className='btn'>确定</div>
         </div>) : null}
       {building ?
         (<div className='mask'>

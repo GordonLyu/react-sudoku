@@ -2,6 +2,22 @@
     min-width: 300px;
 }
 
+.mask {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 99999;
+    background-color: #55555575;
+    color: #fff;
+    font-size: 2rem;
+    text-shadow: 0 0 0 5px #000;
+}
 
 .main {
     position: relative;
@@ -61,9 +77,15 @@
         box-shadow: 0px 0px 5px 0 #000 inset;
     }
 
+    /* 填入错误数字 */
+    &.error {
+        background-color: #ff9aab;
+    }
+
     /* 固定格子 */
     &.fixed {
-        background-color: #bbb;
+        background-color: #eee;
+        font-weight: bolder;
     }
 }
 

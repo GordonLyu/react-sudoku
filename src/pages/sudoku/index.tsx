@@ -8,45 +8,37 @@ const insertNumberAudio = new Audio('/audio/plop.wav');// 填入数字音效
 const clearNumberAudio = new Audio('/audio/clear.mp3');// 擦除数字音效
 insertNumberAudio.volume = clearNumberAudio.volume = 0.5;
 
-topic.build()
+interface TopicInterface {
+  value: number | null,
+  fixed: boolean,
+  isTrue: boolean
+}
 
 
 const sudoku: React.FC = () => {
   const [toolbarHight, setToolbarHight] = useState<number>();
   const [selected, setSelected] = useState<number[]>([-1, -1]);
-  const [numbers, setNumbers] = useState<Array<Array<{
-    value: number | null,
-    fixed: boolean,
-  }>>>(() => {
+  const [building, setBuilding] = useState<boolean>(false);
+  const [isComplete, setIsComplete] = useState<boolean>(false)
+  const [ans, setAns] = useState<number[][]>([]);
+  const [numbers, setNumbers] = useState<TopicInterface[][]>(() => {
     let tt = []
     for (let i = 0, l = 1; i < 9; i++) {
       const t = [];
       for (let j = 0; j < 9; j++, l++) {
         t.push({
-          value: l,
-          fixed: false
+          value: 0,
+          fixed: false,
+          isTrue: true
         });
       }
       tt.push(t);
     }
+
     return tt;
   });
 
-
   const toolbarRef = createRef<HTMLDivElement>()
-
-
-
-  setTimeout(() => {
-    numbers[1][1] = {
-      value: 3,
-      fixed: true
-    };
-    setNumbers([...numbers])
-
-  }, 0)
-
-
 
   // 工具栏高度自适应
   const ChangeToolbarHight = () => {
@@ -59,6 +51,33 @@ const sudoku: React.FC = () => {
   }, 0)
   onresize = () => {
     ChangeToolbarHight();
+  }
+
+  // 获取题目
+  const getTopic = (builded: boolean, res?: {
+    topic: TopicInterface[][],
+    ans: number[][]
+  }) => {
+    if (builded) {
+      setNumbers(res!.topic);
+      setAns(res?.ans!)
+      setBuilding(false);
+    } else {
+      setBuilding(true);
+    }
+  }
+
+  // 验证答案
+  const verify = () => {
+    const res = topic.verify(numbers, ans);
+    if (res == -1) {
+      numbers[selected[0]][selected[1]].isTrue = false;
+    } else if (res == 1) {
+      numbers[selected[0]][selected[1]].isTrue = true;
+    } else if (res == 2) {
+      setIsComplete(true)
+    }
+    setNumbers(numbers);
   }
 
   // 选择格子
@@ -79,32 +98,32 @@ const sudoku: React.FC = () => {
     setSelected([-1, -1]);
   }
 
-
   // 开关音频
   const audioSwitch = (isOpen?: boolean) => {
-    if (isOpen) {
-      insertNumberAudio.volume = clearNumberAudio.volume = 1;
-    } else {
-      insertNumberAudio.volume = clearNumberAudio.volume = 0;
-    }
+    insertNumberAudio.muted = clearNumberAudio.muted = !isOpen;
   }
-
 
   // 填入数字
   const insertNumber = (r: number, c: number, n: number | null) => {
-    if (selected[0] == -1) {
+    if (selected[0] == -1 && n != 0) {
       return;
     }
     numbers[r][c].value = n;
     setNumbers([...numbers]);
     cancelSelectNumber();
-
+    if (n != 0) {
+      verify();
+    }
     // 播放音效
     if (n) {
       insertNumberAudio.currentTime = 0.6;
       insertNumberAudio.play();
     } else {
-      clearNumberAudio.currentTime = 4.5;
+      clearNumberAudio.currentTime = 4;
+      clearNumberAudio.playbackRate = 2;
+      setTimeout(() => {
+        clearNumberAudio.load()
+      }, 400);
       clearNumberAudio.play();
     }
   }
@@ -115,8 +134,21 @@ const sudoku: React.FC = () => {
   }
 
   // 清除数字
-  const clearNumber = () => {
-    insertNumber(selected[0], selected[1], null);
+  const clearNumber = (all?: boolean) => {
+    let t = numbers
+    if (all) {
+      for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+          if (!t[i][j].fixed && t[i][j].value) {
+            numbers[i][j].isTrue = true
+            insertNumber(i, j, 0);
+
+          }
+        }
+      }
+    } else {
+      insertNumber(selected[0], selected[1], 0);
+    }
   }
 
   // 键盘输入数字
@@ -130,15 +162,27 @@ const sudoku: React.FC = () => {
 
   return (
     <>
+      {isComplete ?
+        (<div className='mask'>
+          <div>恭喜！已完成数独</div>
+          <div onClick={() => { setIsComplete(false) }}>确定</div>
+        </div>) : null}
+      {building ?
+        (<div className='mask'>
+          <div>题目生成中，请稍等...</div>
+          <div>若生成过久请刷新</div>
+        </div>) : null}
       <div className='main' style={{
         marginBottom: `${toolbarHight! + 50}px`
       }}>
-        {numbers.map((row, i) => {
+        {topic.formatArr(numbers).map((row, i) => {
           return (
             <div className='grid' key={i}>
               {row.map((_item, j) => {
                 return (
-                  <div className={`${_item.value ? 'inserted' : ''} ${selected![0] == i && selected![1] == j ? 'selected' : ''} ${_item.fixed ? 'fixed' : ''} `} onClick={() => { selectItem(i, j) }} key={i * (j + 1) + j}>{_item.value}</div>
+                  <div className={`${_item.value ? 'inserted' : ''} 
+                  ${selected![0] == Math.floor(i / 3) * 3 + Math.floor(j / 3) && selected![1] == (i % 3) * 3 + (j % 3) ? 'selected' : ''} 
+                  ${_item.fixed ? 'fixed' : ''} ${_item.isTrue ? '' : 'error'}`} onClick={() => { selectItem(Math.floor(i / 3) * 3 + Math.floor(j / 3), (i % 3) * 3 + (j % 3)) }} key={i * (j + 1) + j}>{_item.value ? _item.value : ''}</div>
                 )
               })}
             </div>
@@ -146,7 +190,7 @@ const sudoku: React.FC = () => {
         })}
       </div>
       <div className="toolbar-main" ref={toolbarRef}>
-        <Toolbar getNumber={selectNumber} clearNumber={clearNumber} audioSwitch={audioSwitch}></Toolbar>
+        <Toolbar getNumber={selectNumber} clearNumber={clearNumber} audioSwitch={audioSwitch} getTopic={getTopic}></Toolbar>
       </div>
     </>
   )

@@ -19,7 +19,7 @@ const sudoku: React.FC = () => {
   const [toolbarHight, setToolbarHight] = useState<number>();
   const [selected, setSelected] = useState<number[]>([-1, -1]);
   const [building, setBuilding] = useState<boolean>(false);
-  const [isComplete, setIsComplete] = useState<boolean>(true)
+  const [isComplete, setIsComplete] = useState<boolean>(false)
   const [ans, setAns] = useState<number[][]>([]);
   const [numbers, setNumbers] = useState<TopicInterface[][]>(() => {
     let tt = []

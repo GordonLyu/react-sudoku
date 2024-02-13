@@ -70,10 +70,10 @@ const toolbar: React.FC<Props> = (props: Props) => {
     for (let i = 1; i < 10; i++) {
         numbers.push(<div key={i} className={styles.num} onClick={() => getNumber(i)} >{i}</div>)
     }
-    numbers.push(<div key={10} className={styles.num} onClick={() => clearNumber} >清除</div>)
-    numbers.push(<div key={11} className={`${styles.num} ${styles.audio} ${audio ? styles.open : ''}`} onClick={audioSwitch} >{audio ? '开' : '关'}音效</div>)
-    numbers.push(<div key={12} className={styles.num} onClick={buildTopic} >生成题目</div>)
-    numbers.push(<div key={13} className={styles.num} onClick={() => clearNumber(true)} >清除所有</div>)
+    numbers.push(<div key={10} className={styles.num} onClick={() => clearNumber()} >清除</div>)
+    numbers.push(<div key={11} className={styles.num} onClick={() => clearNumber(true)} >清除所有</div>)
+    numbers.push(<div key={12} className={`${styles.num} ${styles.audio} ${audio ? styles.open : ''}`} onClick={audioSwitch} >{audio ? '开' : '关'}音效</div>)
+    numbers.push(<div key={13} className={styles.num} onClick={buildTopic} >生成题目</div>)
     return (
         <div className={styles.toolbar} >
             {numbers}

@@ -15,11 +15,37 @@ interface TopicInterface {
 }
 
 
+interface TimerInterface {
+  startTime: number;
+  endTime: number;
+  string: string;
+  interval?: NodeJS.Timeout;
+  start(): void;
+  stop(): void;
+}
+
 const sudoku: React.FC = () => {
   const [toolbarHight, setToolbarHight] = useState<number>();
   const [selected, setSelected] = useState<number[]>([-1, -1]);
   const [building, setBuilding] = useState<boolean>(false);
   const [isComplete, setIsComplete] = useState<boolean>(false)
+  const [timer, setTimer] = useState<TimerInterface>({
+    startTime: 0,
+    endTime: 0,
+    string: '',
+    interval: undefined,
+    start: () => {
+      timer.startTime = new Date().getTime();
+      timer.interval = setInterval(() => {
+        timer.endTime = new Date().getTime();
+        timer.string = new Date(timer.endTime - timer.startTime - 28800000).toLocaleTimeString();
+        setTimer({ ...timer });
+      }, 50);
+    },
+    stop: () => {
+      clearInterval(timer.interval)
+    },
+  })
   const [ans, setAns] = useState<number[][]>([]);
   const [numbers, setNumbers] = useState<TopicInterface[][]>(() => {
     let tt = []
@@ -62,6 +88,9 @@ const sudoku: React.FC = () => {
       setNumbers(res!.topic);
       setAns(res?.ans!)
       setBuilding(false);
+      cancelSelectNumber();
+      timer.stop();
+      timer.start();
     } else {
       setBuilding(true);
     }
@@ -76,6 +105,7 @@ const sudoku: React.FC = () => {
       numbers[selected[0]][selected[1]].isTrue = true;
     } else if (res == 2) {
       setIsComplete(true)
+      timer.stop();
     }
     setNumbers(numbers);
   }
@@ -142,7 +172,6 @@ const sudoku: React.FC = () => {
           if (!t[i][j].fixed && t[i][j].value) {
             numbers[i][j].isTrue = true
             insertNumber(i, j, 0);
-
           }
         }
       }
@@ -173,6 +202,8 @@ const sudoku: React.FC = () => {
           <div>题目生成中，请稍等...</div>
           <div>若生成过久请刷新</div>
         </div>) : null}
+
+      <div className='time'>{timer.string}</div>
       <div className='main' style={{
         marginBottom: `${toolbarHight! + 50}px`
       }}>
